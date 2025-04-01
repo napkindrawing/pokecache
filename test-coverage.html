@@ -61,13 +61,15 @@
 				
 				<option value="file2">napkindrawing.com/pokecache/server/handler_get_id.go (38.9%)</option>
 				
-				<option value="file3">napkindrawing.com/pokecache/server/handler_post_add.go (46.7%)</option>
+				<option value="file3">napkindrawing.com/pokecache/server/handler_get_name.go (35.7%)</option>
 				
-				<option value="file4">napkindrawing.com/pokecache/server/mux.go (100.0%)</option>
+				<option value="file4">napkindrawing.com/pokecache/server/handler_post_add.go (46.7%)</option>
 				
-				<option value="file5">napkindrawing.com/pokecache/server/server.go (100.0%)</option>
+				<option value="file5">napkindrawing.com/pokecache/server/mux.go (100.0%)</option>
 				
-				<option value="file6">napkindrawing.com/pokecache/services/cache/service.go (88.2%)</option>
+				<option value="file6">napkindrawing.com/pokecache/server/server.go (100.0%)</option>
+				
+				<option value="file7">napkindrawing.com/pokecache/services/cache/service.go (88.2%)</option>
 				
 				</select>
 			</div>
@@ -119,7 +121,7 @@ func main() <span class="cov0" title="0">{
                 Handler:           srv.NewServeMux(),
         }
 
-        slog.Info("starting server")
+        slog.Info("starting server on port 8080")
 
         err := httpSrv.ListenAndServe()
         if err != nil </span><span class="cov0" title="0">{
@@ -214,6 +216,42 @@ func (srv *Server) HandlerGetID(w http.ResponseWriter, req *http.Request) <span 
 
 import (
         "encoding/json"
+        "log/slog"
+        "net/http"
+)
+
+func (srv *Server) HandlerGetName(w http.ResponseWriter, req *http.Request) <span class="cov8" title="1">{
+        name := req.PathValue("name")
+
+        pokemon := srv.Cache.GetByName(name)
+
+        if pokemon == nil </span><span class="cov8" title="1">{
+                w.WriteHeader(http.StatusNotFound)
+
+                return
+        }</span>
+
+        <span class="cov0" title="0">pokemonJSON, errJSON := json.Marshal(pokemon)
+        if errJSON != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+
+                return
+        }</span>
+
+        <span class="cov0" title="0">_, errWrite := w.Write(pokemonJSON)
+        if errWrite != nil </span><span class="cov0" title="0">{
+                slog.Error("error writing response", "error", errWrite)
+                w.WriteHeader(http.StatusInternalServerError)
+
+                return
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package server
+
+import (
+        "encoding/json"
         "io"
         "log/slog"
         "net/http"
@@ -249,13 +287,14 @@ func (srv *Server) HandlerPostAdd(w http.ResponseWriter, req *http.Request) <spa
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package server
+		<pre class="file" id="file5" style="display: none">package server
 
 import "net/http"
 
-func (srv *Server) NewServeMux() *http.ServeMux <span class="cov10" title="3">{
+func (srv *Server) NewServeMux() *http.ServeMux <span class="cov10" title="4">{
         mux := http.NewServeMux()
         mux.Handle("GET /id/{id}", http.HandlerFunc(srv.HandlerGetID))
+        mux.Handle("GET /name/{name}", http.HandlerFunc(srv.HandlerGetName))
         mux.Handle("POST /add", http.HandlerFunc(srv.HandlerPostAdd))
         mux.Handle("DELETE /id/{id}", http.HandlerFunc(srv.HandlerDelete))
 
@@ -263,7 +302,7 @@ func (srv *Server) NewServeMux() *http.ServeMux <span class="cov10" title="3">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package server
+		<pre class="file" id="file6" style="display: none">package server
 
 import "napkindrawing.com/pokecache/services/cache"
 
@@ -271,7 +310,7 @@ type Server struct {
         Cache cache.Service
 }
 
-func NewServer(maxCapacity int) *Server <span class="cov10" title="3">{
+func NewServer(maxCapacity int) *Server <span class="cov10" title="4">{
         cacheSvc := cache.NewService(maxCapacity)
 
         srv := &amp;Server{
@@ -282,7 +321,7 @@ func NewServer(maxCapacity int) *Server <span class="cov10" title="3">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package cache
+		<pre class="file" id="file7" style="display: none">package cache
 
 import (
         "errors"
@@ -308,7 +347,7 @@ type Service interface {
 }
 
 //nolint:ireturn // We want to return an interface here for clarity
-func NewService(maxCapacity int) Service <span class="cov8" title="7">{
+func NewService(maxCapacity int) Service <span class="cov9" title="8">{
         svc := &amp;serviceImpl{
                 mut:             sync.Mutex{},
                 data:            map[string]models.Pokemon{},
@@ -328,7 +367,7 @@ type serviceImpl struct {
         nameInsertOrder []string
 }
 
-func (svc *serviceImpl) Count() int <span class="cov10" title="9">{
+func (svc *serviceImpl) Count() int <span class="cov10" title="10">{
         svc.mut.Lock()
         defer svc.mut.Unlock()
 
@@ -352,12 +391,12 @@ func (svc *serviceImpl) GetByID(id models.PokemonID) *models.Pokemon <span class
         <span class="cov5" title="3">return &amp;pokemon</span>
 }
 
-func (svc *serviceImpl) GetByName(name string) *models.Pokemon <span class="cov3" title="2">{
+func (svc *serviceImpl) GetByName(name string) *models.Pokemon <span class="cov5" title="3">{
         svc.mut.Lock()
         defer svc.mut.Unlock()
 
         pokemon, okPokemon := svc.data[name]
-        if !okPokemon </span><span class="cov1" title="1">{
+        if !okPokemon </span><span class="cov3" title="2">{
                 return nil
         }</span>
 
@@ -384,7 +423,7 @@ func (svc *serviceImpl) Delete(id models.PokemonID) error <span class="cov3" tit
         return nil</span>
 }
 
-func (svc *serviceImpl) Add(pokemon models.Pokemon) error <span class="cov9" title="8">{
+func (svc *serviceImpl) Add(pokemon models.Pokemon) error <span class="cov9" title="9">{
         svc.mut.Lock()
         defer svc.mut.Unlock()
 
@@ -393,13 +432,13 @@ func (svc *serviceImpl) Add(pokemon models.Pokemon) error <span class="cov9" tit
                 return fmt.Errorf("%w: id %d already in use for pokemon '%s'", ErrDuplicateID, pokemon.ID, name)
         }</span>
 
-        <span class="cov9" title="8">existing, okExisting := svc.data[pokemon.Name]
+        <span class="cov9" title="9">existing, okExisting := svc.data[pokemon.Name]
         if okExisting </span><span class="cov0" title="0">{
                 return fmt.Errorf("%w: name '%s' already in use by pokemon id %d", ErrDuplicateName, pokemon.Name, existing.ID)
         }</span>
 
         // Uh-oh, are we at capacity?
-        <span class="cov9" title="8">if len(svc.data) == svc.maxCapacity </span><span class="cov1" title="1">{
+        <span class="cov9" title="9">if len(svc.data) == svc.maxCapacity </span><span class="cov1" title="1">{
                 // What is the oldest name?
                 oldestName := svc.nameInsertOrder[0]
                 svc.nameInsertOrder = svc.nameInsertOrder[1:]
@@ -415,7 +454,7 @@ func (svc *serviceImpl) Add(pokemon models.Pokemon) error <span class="cov9" tit
                 delete(svc.idNameLookup, oldestPokemon.ID)</span>
         }
 
-        <span class="cov9" title="8">svc.data[pokemon.Name] = pokemon
+        <span class="cov9" title="9">svc.data[pokemon.Name] = pokemon
         svc.idNameLookup[pokemon.ID] = pokemon.Name
         svc.nameInsertOrder = append(svc.nameInsertOrder, pokemon.Name)
 

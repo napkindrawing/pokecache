@@ -27,7 +27,7 @@ func main() {
 		Handler:           srv.NewServeMux(),
 	}
 
-	slog.Info("starting server")
+	slog.Info("starting server on port 8080")
 
 	err := httpSrv.ListenAndServe()
 	if err != nil {

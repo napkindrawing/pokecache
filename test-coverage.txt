@@ -1,6 +1,7 @@
 napkindrawing.com/pokecache/main.go => (0.0%)
 napkindrawing.com/pokecache/server/handler_delete.go => (46.2%)
 napkindrawing.com/pokecache/server/handler_get_id.go => (38.9%)
+napkindrawing.com/pokecache/server/handler_get_name.go => (35.7%)
 napkindrawing.com/pokecache/server/handler_post_add.go => (46.7%)
 napkindrawing.com/pokecache/server/mux.go => (100.0%)
 napkindrawing.com/pokecache/server/server.go => (100.0%)

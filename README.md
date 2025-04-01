@@ -1,4 +1,61 @@
-Current Test Coverage: 65.2%
+Current Test Coverage: 62.2%
+
+# Pokecache
+
+Pokecache is a memory-based, high-performance, web-scale Pokemon cache.
+
+## Usage
+
+See the `Makefile` and/or run `make` in your terminal to see how to run Pokecache as well as run tests.
+
+Helpful commands:
+
+Run all tests with go's built-in race detector enabled (this can be slow):
+
+```
+make test
+```
+
+Run all tests with go's built-in race detector disabled:
+
+```
+make quicktest
+```
+
+Run linting tools:
+```
+make lint
+```
+
+Run the server on port `8080`
+
+```
+make server
+```
+
+Once the server is running you can run commands such as:
+
+```
+curl -s -i --json '{"id":12,"name":"spot","height":17}' -X POST http://127.0.0.1:8080/add
+curl -s -i http://127.0.0.1:8080/id/12
+curl -s -i http://127.0.0.1:8080/name/spot
+curl -s -i  -X DELETE http://127.0.0.1:8080/id/12
+```
+
+## TODO
+
+Remaining items to implement in order to secure VC-backing and properly disrupt the Pokemon Cache Industry:
+
+- Runtime-configuration with go's stdlib `flag` package
+- Data-validation for submitted pokemon
+- Better test coverage in HTTP handlers
+- Edge-cases in HTTP handlers
+
+## Test Coverage
+
+See `test-coverage.html` and `test-coverage.txt` for HTML and plain-text
+reports of current test-coverage details. These files are automatically updated
+by the `make test` and `make quicktest` targets.
 
 ### Coding Challenge Guidelines
 
