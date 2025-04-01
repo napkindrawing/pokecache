@@ -1,3 +1,5 @@
+Current Test Coverage: 0.0%
+
 ### Coding Challenge Guidelines
 
 Hello and thanks for your interest in joining `Weave`! We are excited to see what you can do.

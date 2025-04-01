@@ -1,0 +1,85 @@
+enableAllRules = true
+
+severity = "error"
+
+confidence = 0.1
+
+[directive.specify-disable-reason]
+
+[[rule.add-constant.Arguments]]
+  maxLitCount="3"
+  allowStrs="\"\",\"text/html\",\"%w: %w\",\"%w: '%s'\",\"0.0\""
+  allowInts="0,1,2,3,255,0o644,0o600,0o770"
+  allowFloats="0.0,0.,1.0,1.,2.0,2.,100.0"
+  ignoreFuncs="fmt.Errorf,strconv.FormatInt,strconv.FormatUint,strconv.ParseInt,strconv.ParseUint,strconv.ParseFloat"
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#argument-limit
+[rule.argument-limit]
+  Arguments = [5]
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#banned-characters
+[rule.banned-characters]
+  Arguments = ["Ω", "Σ", "σ"]
+
+[rule.bare-return]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#cognitive-complexity
+[rule.cognitive-complexity]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#comment-spacings
+[rule.comment-spacings]
+  Arguments = ["nolint"]
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#cyclomatic
+[rule.cyclomatic]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#error-strings
+[rule.error-strings]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#file-header
+[rule.file-header]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#exported
+[rule.exported]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#function-length
+[rule.function-length]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#function-result-limit
+[rule.function-result-limit]
+  Arguments = [3]
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#line-length-limit
+[rule.line-length-limit]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#max-public-structs
+[rule.max-public-structs]
+  Arguments = [3]
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#package-comments
+[rule.package-comments]
+  Disabled = true
+
+[rule.range-val-address]
+  Disabled = true
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unhandled-error
+[rule.unhandled-error]
+  Arguments = [
+    "fmt\\.Print",
+    "fmt\\.Printf",
+    "fmt\\.Println",
+    "strings\\.Builder\\.WriteString",
+  ]
+
+# https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#var-naming
+[rule.var-naming]
+  Arguments = [[], [], [{skipPackageNameChecks=true}]]

@@ -1,0 +1,145 @@
+linters:
+  enable-all: true
+  disable:
+    - gci
+    - gocyclo
+    - godot
+    - lll
+    - nilnil
+    - recvcheck
+    - tagliatelle
+    - tenv
+    # We have and run our own revive config
+    - revive
+    - wsl
+
+linters-settings:
+  cyclop:
+    max-complexity: 14
+  errcheck:
+    exclude-functions:
+      - "(*github.com/gin-gonic/gin.Context).AbortWithError"
+      - "(*github.com/gin-gonic/gin.Context).Error"
+  forbidigo:
+    forbid:
+      - p: "^(fmt\\.Print(|f|ln)|print|println)$"
+        msg: "oh noes print statements"
+      - p: time.Sleep
+        msg: "Avoid time.Sleep in you code please"
+    exclude-godoc-examples: true
+    analyze-types: true
+  funlen:
+    lines: 100
+    statements: 50
+  depguard:
+    # https://github.com/OpenPeeDeeP/depguard
+    # https://golangci-lint.run/usage/linters/#depguard
+    rules:
+      main:
+        deny:
+          - pkg: "reflect"
+            desc: Please do not use reflect package
+          - pkg: "github.com/pkg/errors"
+            desc: Should be replaced by standard lib errors package
+          - pkg: "go.uber.org/multierr"
+            desc: "Should be replaced by standard fmt.Errorf with multiple %w specifiers"
+  godox:
+    keywords:
+      - BUG
+      - FIXME
+  mnd:
+    ignored-numbers:
+      - "0o600"
+      - "0o644"
+      - "0o770"
+      - "2"
+      - "2.0"
+      - "255"
+    ignored-functions:
+      - "strconv.ParseUint"
+  nestif:
+    min-complexity: 5
+  gosec:
+    excludes:
+      - G601 # Implicit memory aliasing of items from a range statement, fixed in go 1.22
+  govet:
+    settings:
+      shadow:
+        strict: true
+    enable-all: true
+    disable:
+      - fieldalignment
+  nolintlint:
+    require-explanation: true
+  nlreturn:
+    block-size: 5
+  stylecheck:
+    # STxxxx checks in https://staticcheck.io/docs/configuration/options/#checks
+    # Default: ["*"]
+    checks: ["all", "-ST1003"]
+  varnamelen:
+    ignore-names:
+      - "a"
+      - "b"
+      - "db"
+      - "id"
+      - "mw"
+      - "to"
+      - "tt"
+    ignore-decls:
+      - "db *gorm.DB"
+      - "tx *gorm.DB"
+      - "b strings.Builder"
+      - "c *gin.Context"
+      - "i int"
+      - "j int"
+      - "x int"
+      - "y int"
+      - "ok bool"
+      - "wg sync.WaitGroup"
+      - "w http.ResponseWriter"
+  wrapcheck:
+    ignoreSigs:
+      - .Errorf(
+      - .Fmt(
+      - errors.Join(
+      - errors.New(
+      - errors.Unwrap(
+      - .Wrap(
+      - .Wrapf(
+      - .WithMessage(
+      - .WithMessagef(
+      - .WithStack(
+      - .WrapIfErr(
+
+issues:
+  exclude-generated: strict
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - path: stripe\.go
+      linters:
+        - musttag
+    # Exclude some stuff for migrations
+    - path: "internal/database/migrator/migration_.*/migration.go"
+      linters:
+        - gochecknoglobals
+    # Exclude some linters from running on tests files.
+    - path: "(_test.go|testing.go)"
+      linters:
+        - containedctx
+        - mnd
+        - wsl
+        - err113
+        - cyclop
+        - dupword
+        - gocognit
+        - exhaustruct
+        - funlen
+        - ireturn
+        - maintidx
+        - nlreturn
+        - wrapcheck
+        - varnamelen
+
+run:
+  timeout: 4m

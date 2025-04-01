@@ -1,0 +1,8 @@
+.DS_Store
+test-coverage.main.html
+test-coverage.HEAD.html
+test-coverage.out.tmp
+test-coverage.out
+
+# Build artifact
+/pokecache
