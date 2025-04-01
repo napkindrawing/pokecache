@@ -57,6 +57,10 @@
 				
 				<option value="file0">napkindrawing.com/pokecache/main.go (0.0%)</option>
 				
+				<option value="file1">napkindrawing.com/pokecache/server/handler_get_id.go (75.0%)</option>
+				
+				<option value="file2">napkindrawing.com/pokecache/server/mux.go (100.0%)</option>
+				
 				</select>
 			</div>
 			<div id="legend">
@@ -80,11 +84,68 @@
 		
 		<pre class="file" id="file0" style="display: none">package main
 
-import "fmt"
+import (
+        "log/slog"
+        "net/http"
+        "time"
+
+        "napkindrawing.com/pokecache/server"
+)
+
+const (
+        ServerReadHeaderTimeout = 5 * time.Second
+        ServerReadTimeout       = 5 * time.Second
+)
 
 func main() <span class="cov0" title="0">{
-        //nolint:forbidigo // OK to use here, scaffolding for now
-        fmt.Println("vim-go")
+        slog.Info("starting application")
+
+        mux := server.NewServeMux()
+
+        //nolint:exhaustruct // Going with defaults here
+        srv := &amp;http.Server{
+                Addr:              ":8080",
+                ReadHeaderTimeout: ServerReadHeaderTimeout,
+                ReadTimeout:       ServerReadTimeout,
+                Handler:           mux,
+        }
+
+        slog.Info("starting server")
+
+        err := srv.ListenAndServe()
+        if err != nil </span><span class="cov0" title="0">{
+                slog.Error("error from server", "error", err)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package server
+
+import (
+        "fmt"
+        "io"
+        "log/slog"
+        "net/http"
+)
+
+func HandlerGetID(w http.ResponseWriter, req *http.Request) <span class="cov8" title="1">{
+        id := req.PathValue("id")
+        _, err := io.WriteString(w, fmt.Sprintf("Hello, '%s'!\n", id))
+        if err != nil </span><span class="cov0" title="0">{
+                slog.Error("error writing response", "error", err)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package server
+
+import "net/http"
+
+func NewServeMux() *http.ServeMux <span class="cov8" title="1">{
+        mux := http.NewServeMux()
+        mux.Handle("/id/{id}", http.HandlerFunc(HandlerGetID))
+
+        return mux
 }</span>
 </pre>
 		
