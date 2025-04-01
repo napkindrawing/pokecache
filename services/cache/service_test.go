@@ -37,6 +37,35 @@ func TestAdd(t *testing.T) {
 
 	got := svc.GetByID(444)
 	assert.NotNil(t, got, "added pokemon is not nil")
+	assert.Equal(t, "Gerblik", got.Name, "(retrieved by name)")
+}
+
+func TestDelete(t *testing.T) {
+	t.Parallel()
+
+	svc := cache.NewService(10)
+
+	tony := models.Pokemon{
+		ID:        333,
+		Name:      "Tony Danza",
+		Type:      models.PokemonTypeNormal,
+		Height:    60,
+		Weight:    202,
+		Abilities: []models.PokemonAbility{},
+	}
+
+	errAdd := svc.Add(tony)
+	require.NoError(t, errAdd)
+
+	got := svc.GetByID(333)
+	assert.NotNil(t, got, "added pokemon is not nil")
+	assert.Equal(t, "Tony Danza", got.Name, "(retrieved by name)")
+
+	errDel := svc.Delete(333)
+	require.NoError(t, errDel)
+
+	gotDel := svc.GetByID(333)
+	assert.Nil(t, gotDel, "deleted pokemon is nil")
 }
 
 func TestCapacity(t *testing.T) {
@@ -97,11 +126,22 @@ func TestCapacity(t *testing.T) {
 
 	assert.Equal(t, 3, svc.Count())
 
+	gotAliceByIDBefore := svc.GetByID(1)
+	assert.NotNil(t, gotAliceByIDBefore, "earliest pokemon (retrieved by id)")
+	assert.Equal(t, "Alice", gotAliceByIDBefore.Name, "earliest pokemon name (retrieved by id)")
+
+	gotAliceByNameBefore := svc.GetByName("Alice")
+	assert.NotNil(t, gotAliceByNameBefore, "earliest pokemon (retrieved by name)")
+	assert.Equal(t, "Alice", gotAliceByNameBefore.Name, "earliest pokemon name (retrieved by name)")
+
 	errAddDumbo := svc.Add(dumbo)
 	require.NoError(t, errAddDumbo)
 
 	assert.Equal(t, 3, svc.Count())
 
-	gotAlice := svc.GetByID(1)
-	assert.Nil(t, gotAlice, "earliest pokemon was purged due to capacity")
+	gotAliceByIDAfter := svc.GetByID(1)
+	assert.Nil(t, gotAliceByIDAfter, "earliest pokemon was purged due to capacity (retrieved by id)")
+
+	gotAliceByNameAfter := svc.GetByName("Alice")
+	assert.Nil(t, gotAliceByNameAfter, "earliest pokemon was purged due to capacity (retrieved by name)")
 }

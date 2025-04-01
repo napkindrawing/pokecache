@@ -1,4 +1,4 @@
-Current Test Coverage: 75.0%
+Current Test Coverage: 65.2%
 
 ### Coding Challenge Guidelines
 

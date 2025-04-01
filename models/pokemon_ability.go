@@ -1,7 +1,7 @@
 package models
 
 type PokemonAbility struct {
-	Name        string
-	Description string
-	Generation  uint8
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Generation  uint8  `json:"generation"`
 }

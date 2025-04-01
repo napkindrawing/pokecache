@@ -18,6 +18,10 @@ help:
 generate:
 	go generate -x ./...
 
+.PHONY: server
+server:
+	go run ./main.go
+
 .PHONY: lint
 lint:
 	go tool gofumpt -l -w .

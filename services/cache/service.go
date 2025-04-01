@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	ErrNotFound      = errors.New("pokemon not found")
 	ErrDuplicateID   = errors.New("duplicate pokemon id")
 	ErrDuplicateName = errors.New("duplicate pokemon name")
 	ErrInternal      = errors.New("unexpected internal error")
@@ -16,7 +17,9 @@ var (
 
 type Service interface {
 	GetByID(id models.PokemonID) *models.Pokemon
+	GetByName(name string) *models.Pokemon
 	Add(pokemon models.Pokemon) error
+	Delete(id models.PokemonID) error
 	Count() int
 }
 
@@ -63,6 +66,38 @@ func (svc *serviceImpl) GetByID(id models.PokemonID) *models.Pokemon {
 	}
 
 	return &pokemon
+}
+
+func (svc *serviceImpl) GetByName(name string) *models.Pokemon {
+	svc.mut.Lock()
+	defer svc.mut.Unlock()
+
+	pokemon, okPokemon := svc.data[name]
+	if !okPokemon {
+		return nil
+	}
+
+	return &pokemon
+}
+
+func (svc *serviceImpl) Delete(id models.PokemonID) error {
+	svc.mut.Lock()
+	defer svc.mut.Unlock()
+
+	name, okName := svc.idNameLookup[id]
+	if !okName {
+		return fmt.Errorf("%w with id %d", ErrNotFound, id)
+	}
+
+	_, okPokemon := svc.data[name]
+	if !okPokemon {
+		return fmt.Errorf("%w internal data missing for pokemon '%s' from id %d", ErrInternal, name, id)
+	}
+
+	delete(svc.data, name)
+	delete(svc.idNameLookup, id)
+
+	return nil
 }
 
 func (svc *serviceImpl) Add(pokemon models.Pokemon) error {

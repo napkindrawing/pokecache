@@ -16,7 +16,8 @@ func TestHandlerGetID(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "http://poke.mon/id/123", nil)
 	w := httptest.NewRecorder()
 
-	mux := server.NewServeMux()
+	srv := server.NewServer(3)
+	mux := srv.NewServeMux()
 
 	mux.ServeHTTP(w, req)
 
@@ -25,5 +26,6 @@ func TestHandlerGetID(t *testing.T) {
 	bodyBytes, _ := io.ReadAll(resp.Body)
 	body := string(bodyBytes)
 
-	assert.Equal(t, "Hello, '123'!\n", body)
+	assert.Equal(t, "", body)
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 }
