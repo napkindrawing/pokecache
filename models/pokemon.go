@@ -1,7 +1,7 @@
 package models
 
 type Pokemon struct {
-	ID   uint64
+	ID   PokemonID
 	Name string
 	Type PokemonType
 	// Measured in Millimeters

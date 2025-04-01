@@ -61,22 +61,15 @@
 				
 				<option value="file2">napkindrawing.com/pokecache/server/mux.go (100.0%)</option>
 				
+				<option value="file3">napkindrawing.com/pokecache/services/cache/service.go (88.2%)</option>
+				
 				</select>
 			</div>
 			<div id="legend">
 				<span>not tracked</span>
 			
-				<span class="cov0">no coverage</span>
-				<span class="cov1">low coverage</span>
-				<span class="cov2">*</span>
-				<span class="cov3">*</span>
-				<span class="cov4">*</span>
-				<span class="cov5">*</span>
-				<span class="cov6">*</span>
-				<span class="cov7">*</span>
-				<span class="cov8">*</span>
-				<span class="cov9">*</span>
-				<span class="cov10">high coverage</span>
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
 			
 			</div>
 		</div>
@@ -147,6 +140,112 @@ func NewServeMux() *http.ServeMux <span class="cov8" title="1">{
 
         return mux
 }</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package cache
+
+import (
+        "errors"
+        "fmt"
+        "sync"
+
+        "napkindrawing.com/pokecache/models"
+)
+
+var (
+        ErrDuplicateID   = errors.New("duplicate pokemon id")
+        ErrDuplicateName = errors.New("duplicate pokemon name")
+        ErrInternal      = errors.New("unexpected internal error")
+)
+
+type Service interface {
+        GetByID(id models.PokemonID) *models.Pokemon
+        Add(pokemon models.Pokemon) error
+        Count() int
+}
+
+//nolint:ireturn // We want to return an interface here for clarity
+func NewService(maxCapacity int) Service <span class="cov8" title="1">{
+        svc := &amp;serviceImpl{
+                mut:             sync.Mutex{},
+                data:            map[string]models.Pokemon{},
+                idNameLookup:    map[models.PokemonID]string{},
+                maxCapacity:     maxCapacity,
+                nameInsertOrder: []string{},
+        }
+
+        return svc
+}</span>
+
+type serviceImpl struct {
+        mut             sync.Mutex
+        data            map[string]models.Pokemon
+        idNameLookup    map[models.PokemonID]string
+        maxCapacity     int
+        nameInsertOrder []string
+}
+
+func (svc *serviceImpl) Count() int <span class="cov8" title="1">{
+        svc.mut.Lock()
+        defer svc.mut.Unlock()
+
+        return len(svc.data)
+}</span>
+
+func (svc *serviceImpl) GetByID(id models.PokemonID) *models.Pokemon <span class="cov8" title="1">{
+        svc.mut.Lock()
+        defer svc.mut.Unlock()
+
+        name, okName := svc.idNameLookup[id]
+        if !okName </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">pokemon, okPokemon := svc.data[name]
+        if !okPokemon </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">return &amp;pokemon</span>
+}
+
+func (svc *serviceImpl) Add(pokemon models.Pokemon) error <span class="cov8" title="1">{
+        svc.mut.Lock()
+        defer svc.mut.Unlock()
+
+        name, okName := svc.idNameLookup[pokemon.ID]
+        if okName </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w: id %d already in use for pokemon '%s'", ErrDuplicateID, pokemon.ID, name)
+        }</span>
+
+        <span class="cov8" title="1">existing, okExisting := svc.data[pokemon.Name]
+        if okExisting </span><span class="cov0" title="0">{
+                return fmt.Errorf("%w: name '%s' already in use by pokemon id %d", ErrDuplicateName, pokemon.Name, existing.ID)
+        }</span>
+
+        // Uh-oh, are we at capacity?
+        <span class="cov8" title="1">if len(svc.data) == svc.maxCapacity </span><span class="cov8" title="1">{
+                // What is the oldest name?
+                oldestName := svc.nameInsertOrder[0]
+                svc.nameInsertOrder = svc.nameInsertOrder[1:]
+
+                // Always check wacky edge-cases, don't assume anything!
+                // The error message emitted below might save us someday.
+                oldestPokemon, okOldest := svc.data[oldestName]
+                if !okOldest </span><span class="cov0" title="0">{
+                        return fmt.Errorf("%w: oldest inserted pokemon name '%s' not found in internal data", ErrInternal, oldestName)
+                }</span>
+
+                <span class="cov8" title="1">delete(svc.data, oldestName)
+                delete(svc.idNameLookup, oldestPokemon.ID)</span>
+        }
+
+        <span class="cov8" title="1">svc.data[pokemon.Name] = pokemon
+        svc.idNameLookup[pokemon.ID] = pokemon.Name
+        svc.nameInsertOrder = append(svc.nameInsertOrder, pokemon.Name)
+
+        return nil</span>
+}
 </pre>
 		
 		</div>
