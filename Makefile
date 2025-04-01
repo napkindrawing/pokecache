@@ -3,6 +3,8 @@ help:
 	@printf "\nmake targets:\n\n"
 	@printf "  Help:\n"
 	@printf "    help .................. This, what this is?\n"
+	@printf "  Code Tooling:\n"
+	@printf "    generate .............. Run go generate\n"
 	@printf "  Linting:\n"
 	@printf "    lint .................. Run all lints, ensures generated code is up-to-date\n"
 	@printf "  Testing:\n"
@@ -11,6 +13,10 @@ help:
 	@printf "  Dev Server:\n"
 	@printf "    server ................ Serveux le HTTP\n"
 	@printf "\n"
+
+.PHONY: generate
+generate:
+	go generate -x ./...
 
 .PHONY: lint
 lint:
@@ -28,7 +34,7 @@ test-run-actual:
 	@[ -n "$$(which perl)" ] && perl -le 'print "🟩" x ($$ENV{"TERM"} ? (qx/tput cols/ / 2) : 40 )' || true
 
 .PHONY: test
-test: lint test-run test-wrapup
+test: generate lint test-run test-wrapup
 
 .PHONY: test-run
 test-run:
