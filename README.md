@@ -46,6 +46,9 @@ curl -s -i  -X DELETE http://127.0.0.1:8080/id/12
 
 Remaining items to implement in order to secure VC-backing and properly disrupt the Pokemon Cache Industry:
 
+- Proper `context.Context` support for app shutdown, request cancellation & timeouts.
+- Instrument w/tracing support, e.g. opentracing
+- Better test coverage (edge-cases, invalid input)
 - Runtime-configuration with go's stdlib `flag` package
 - Data-validation for submitted pokemon
 - Better test coverage in HTTP handlers
